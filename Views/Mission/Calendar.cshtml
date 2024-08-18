@@ -1,0 +1,188 @@
+@model IEnumerable<Calendar.Models.Mission>
+
+@{
+    var missionEvents = Model.Select(m => new {
+        id = m.Id,
+        title = m.Title,
+        start = m.StartDate.ToString("yyyy-MM-dd"),
+        end = m.EndDate.ToString("yyyy-MM-dd"),
+        description = m.Description
+    }).ToList();
+
+    var jsonMissions = System.Text.Json.JsonSerializer.Serialize(missionEvents);
+}
+
+<h2 style="text-align: center;">Mission Calendar</h2>
+
+<!-- Modal for creating/editing missions -->
+<div class="modal fade" id="missionModal" tabindex="-1" role="dialog" aria-labelledby="missionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="missionModalLabel">Mission Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <form id="missionForm">
+                <input type="hidden" id="missionId" name="missionId" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter mission title" required />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" name="startDate" required />
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="endDate">End Date</label>
+                            <input type="date" class="form-control" id="endDate" name="endDate" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Enter mission description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="deleteMissionButton">Delete</button>
+                    <button type="submit" class="btn btn-primary">Save Mission</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="article-box">
+<div class="login-container">
+<div id="calendar"></div>
+</div>
+</div>
+
+@section Scripts {
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            editable: true,
+            events: @Html.Raw(jsonMissions),
+            dateClick: function(info) {
+                $('#missionId').val('');
+                $('#startDate').val(info.dateStr);
+                $('#endDate').val(info.dateStr);
+                $('#deleteMissionButton').hide(); // Hide delete button for new missions
+                $('#missionModal').modal('show');
+            },
+            eventClick: function(info) {
+                var mission = info.event;
+                console.log(mission.endStr);
+                $('#missionId').val(mission.id);
+                $('#title').val(mission.title);
+                $('#startDate').val(mission.start.toISOString().slice(0,10));
+                
+                if (!mission.endStr) {
+                $('#endDate').val(mission.start.toISOString().slice(0,10));
+                console.log("here");
+                } else{
+                $('#endDate').val(mission.endStr);
+                console.log("there");
+                }
+                $('#description').val(mission.extendedProps.description);
+                $('#deleteMissionButton').show(); // Show delete button for existing missions
+                $('#missionModal').modal('show');
+            }
+        });
+
+        calendar.render();
+
+
+        $('#missionForm').on('submit', function(event) {
+            event.preventDefault();
+
+            var missionId = $('#missionId').val();
+            var title = $('#title').val();
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            var description = $('#description').val();
+
+
+            var data = {
+                title: title,
+                startDate: startDate,
+                endDate: endDate,
+                description: description
+            };
+
+            if (missionId) {
+                data.id = missionId;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Create", "Mission")',
+                type: 'POST',
+                data: data,
+                success: function(response) {
+                    if(response.success) {
+                        if (missionId) {
+                        var event = calendar.getEventById(missionId);
+                        event.setProp('title', title);
+                        event.setDates(startDate, endDate);
+                        event.setExtendedProp('description', description);
+                    } else {
+                        calendar.addEvent({
+                            id: response.id,
+                            title: title,
+                            start: startDate,
+                            end: endDate,
+                            extendedProps: {
+                                description: description
+                            }
+                        });
+                    }
+                        $('#missionModal').modal('hide');
+                    } else {
+                        alert('An error occurred while saving the mission.');
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while saving the mission.');
+                }
+            });
+        });
+        $('#deleteMissionButton').on('click', function() {
+            var missionId = $('#missionId').val();
+
+            if (missionId) {
+                $.ajax({
+                    url: '@Url.Action("DeleteMission", "Mission")',
+                    type: 'POST',
+                    data: { id: missionId },
+                    success: function(response) {
+                        if (response.success) {
+                            var event = calendar.getEventById(missionId);
+                            if (event) {
+                                event.remove();
+                            }
+                            $('#missionModal').modal('hide');
+                        } else {
+                            alert('An error occurred while deleting the mission.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while deleting the mission.');
+                    }
+                });
+            } else {
+                alert('No mission selected to delete.');
+            }
+        });
+
+    });
+    </script>
+    <script src="~/lib/fullcalendar/dist/index.global.min.js"></script>
+    <script src="~/lib/fullcalendar/packages/daygrid/index.global.min.js"></script>
+}
