@@ -126,6 +126,12 @@
 .modal-body[b-ac8x0wzefo] {
     color: #000;
 }
+.filter-container[b-ac8x0wzefo] {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    right: 0;
+}
 /* _content/Calendar/Views/Shared/_Layout.cshtml.rz.scp.css */
 /* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
@@ -191,4 +197,5 @@ button.accept-policy[b-uy2ta6uuxa] {
   width: 100%;
   white-space: nowrap;
   line-height: 60px;
+  background-color: #1f1d2e;
 }

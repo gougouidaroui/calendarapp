@@ -6,14 +6,33 @@
         title = m.Title,
         start = m.StartDate.ToString("yyyy-MM-dd"),
         end = m.EndDate.ToString("yyyy-MM-dd"),
+        site = m.Site.ToString(),
+        employee = m.Employee.ToString(),
         description = m.Description
     }).ToList();
 
     var jsonMissions = System.Text.Json.JsonSerializer.Serialize(missionEvents);
 }
 
-<h2 style="text-align: center;">Gestion des missions</h2>
 
+<div class="filter-container">
+    <select id="siteFilter" class="filter-cell">
+        <option value="">Tous les sites</option>
+        <option value="SiteA">Site A</option>
+        <option value="SiteB">Site B</option>
+        <option value="SiteC">Site C</option>
+        <option value="SiteD">Site D</option>
+    </select>
+
+    <select id="employeeFilter" class="filter-cell">
+        <option value="">Tous les employés</option>
+        <option value="Employe">Employé</option>
+        <option value="Gardien">Gardien</option>
+        <option value="Conseiller">Conseiller</option>
+        <option value="Directeur">Directeur</option>
+        <option value="Agent">Agent</option>
+    </select>
+</div>
 <!-- Modal for creating/editing missions -->
 <div class="modal fade" id="missionModal" tabindex="-1" role="dialog" aria-labelledby="missionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -23,7 +42,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal">
                 </button>
             </div>
-            <form id="missionForm">
+            <form id="missionForm" autocomplete="off">
                 <input type="hidden" id="missionId" name="missionId" />
                 <div class="modal-body">
                     <div class="form-group">
@@ -39,6 +58,25 @@
                             <label for="endDate">Date de fin</label>
                             <input type="date" class="form-control" id="endDate" name="endDate" required />
                         </div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="site">Site</label>
+                        <select id="site" name="Site" class="form-control" required>
+                            <option value="SiteA">Site A</option>
+                            <option value="SiteB">Site B</option>
+                            <option value="SiteC">Site C</option>
+                            <option value="SiteD">Site D</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="employee">Employé</label>
+                        <select id="employee" name="Employee" class="form-control" required>
+                            <option value="Employe">Employe</option>
+                            <option value="Gardien">Gardien</option>
+                            <option value="Conseiller">Conseiller</option>
+                            <option value="Directeur">Directeur</option>
+                            <option value="Agent">Agent</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="description">Déscription</label>
@@ -75,25 +113,30 @@
                 $('#missionId').val('');
                 $('#startDate').val(info.dateStr);
                 $('#endDate').val(info.dateStr);
-                $('#deleteMissionButton').hide(); // Hide delete button for new missions
+                $('#site').val('SiteA');
+                $('#employee').val('Employe');
+                $('#deleteMissionButton').hide();
                 $('#missionModal').modal('show');
             },
             eventClick: function(info) {
                 var mission = info.event;
-                console.log(mission.endStr);
                 $('#missionId').val(mission.id);
                 $('#title').val(mission.title);
-                $('#startDate').val(mission.start.toISOString().slice(0,10));
+                var startDate = new Date(mission.start);
+                startDate.setDate(startDate.getDate() + 1);
+                $('#startDate').val(startDate.toISOString().slice(0,10));
                 
                 if (!mission.endStr) {
-                $('#endDate').val(mission.start.toISOString().slice(0,10));
-                console.log("here");
+                    var startDate = new Date(mission.start);
+                    startDate.setDate(startDate.getDate() + 1);
+                    $('#endDate').val(startDate.toISOString().slice(0, 10));
                 } else{
-                $('#endDate').val(mission.endStr);
-                console.log("there");
+                    $('#endDate').val(mission.endStr);
                 }
+                $('#site').val(mission.extendedProps.site);
+                $('#employee').val(mission.extendedProps.employee);
                 $('#description').val(mission.extendedProps.description);
-                $('#deleteMissionButton').show(); // Show delete button for existing missions
+                $('#deleteMissionButton').show();
                 $('#missionModal').modal('show');
             },
             eventColor: '#eb6f92'
@@ -109,6 +152,8 @@
             var title = $('#title').val();
             var startDate = $('#startDate').val();
             var endDate = $('#endDate').val();
+            var site = $('#site').val();
+            var employee = $('#employee').val();
             var description = $('#description').val();
 
 
@@ -116,6 +161,8 @@
                 title: title,
                 startDate: startDate,
                 endDate: endDate,
+                site: site,
+                employee: employee,
                 description: description
             };
 
@@ -133,6 +180,8 @@
                         var event = calendar.getEventById(missionId);
                         event.setProp('title', title);
                         event.setDates(startDate, endDate);
+                        event.setExtendedProp('site', site);
+                        event.setExtendedProp('employee', employee);
                         event.setExtendedProp('description', description);
                     } else {
                         calendar.addEvent({
@@ -141,6 +190,8 @@
                             start: startDate,
                             end: endDate,
                             extendedProps: {
+                                site: site,
+                                employee: employee,
                                 description: description
                             }
                         });
@@ -183,6 +234,39 @@
             }
         });
 
+        function filterEvents() {
+            var selectedSite = $('#siteFilter').val();
+            var selectedEmployee = $('#employeeFilter').val();
+
+            calendar.removeAllEvents();
+            var allEvents = @Html.Raw(jsonMissions);
+
+            // Filter events based on the selected values
+            var filteredEvents = allEvents.filter(function(event) {
+                var matchesSite = selectedSite === "" || event.site === selectedSite;
+                var matchesEmployee = selectedEmployee === "" || event.employee === selectedEmployee;
+                return matchesSite && matchesEmployee;
+            });
+
+            // Add the filtered events back to the calendar
+            filteredEvents.forEach(function(event) {
+                calendar.addEvent({
+                    id: event.id,
+                    title: event.title,
+                    start: event.start,
+                    end: event.end,
+                    extendedProps: {
+                        site: event.site,
+                        employee: event.employee,
+                        description: event.description
+                    }
+                });
+            });
+        };
+
+        // Event listeners for the dropdowns
+        $('#siteFilter').on('change', filterEvents);
+        $('#employeeFilter').on('change', filterEvents);
     });
     </script>
     <script src="~/lib/fullcalendar/dist/index.global.min.js"></script>

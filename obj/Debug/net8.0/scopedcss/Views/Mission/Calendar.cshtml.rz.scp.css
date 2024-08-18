@@ -20,3 +20,9 @@
 .modal-body[b-ac8x0wzefo] {
     color: #000;
 }
+.filter-container[b-ac8x0wzefo] {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    right: 0;
+}

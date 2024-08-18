@@ -16,5 +16,26 @@ namespace Calendar.Models
         public DateTime EndDate { get; set; }
 
         public string Description { get; set; }
+
+        [Required]
+        public SiteChoice Site { get; set; }
+
+        [Required]
+        public EmployeeChoice Employee { get; set; }
+    }
+    public enum SiteChoice
+    {
+        SiteA,
+        SiteB,
+        SiteC,
+        SiteD
+    }
+    public enum EmployeeChoice
+    {
+        Employe,
+        Gardien,
+        Conseiller,
+        Directeur,
+        Agent
     }
 }

@@ -35,6 +35,8 @@ public class MissionController : Controller
                 {
                     existingMission.Title = mission.Title;
                     existingMission.StartDate = mission.StartDate;
+                    existingMission.Site = mission.Site;
+                    existingMission.Employee = mission.Employee;
                     existingMission.EndDate = mission.EndDate;
                     existingMission.Description = mission.Description;
                     await _context.SaveChangesAsync();
