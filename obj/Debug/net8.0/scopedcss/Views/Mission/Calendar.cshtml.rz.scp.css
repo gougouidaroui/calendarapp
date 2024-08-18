@@ -9,7 +9,14 @@
     height:100%;
     width:65%;
     padding: 2rem;
-    background-color: #fff;
+    background-color: #393552;
     border: 1px solid #ddd;
     border-radius: 8px;
+}
+
+.modal-header[b-ac8x0wzefo] {
+    background-color: #393552;
+}
+.modal-body[b-ac8x0wzefo] {
+    color: #000;
 }

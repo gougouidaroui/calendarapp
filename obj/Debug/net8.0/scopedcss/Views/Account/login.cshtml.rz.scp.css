@@ -14,6 +14,7 @@
     border: 1px solid #ddd;
     border-radius: 8px 0px 0px 8px;
     border-right: none;
+    color: #000;
 }
 .image-holder[b-n80mowmy6q] {
     width:100%;
@@ -44,3 +45,7 @@
   position: relative;
   z-index: 2;
 }
+.login-ref[b-n80mowmy6q] {
+    color: #f6c177 !important;
+}
+

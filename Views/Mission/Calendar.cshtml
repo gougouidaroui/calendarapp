@@ -18,7 +18,7 @@
 <div class="modal fade" id="missionModal" tabindex="-1" role="dialog" aria-labelledby="missionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header">
                 <h5 class="modal-title" id="missionModalLabel">Mission Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal">
                 </button>
@@ -94,7 +94,8 @@
                 $('#description').val(mission.extendedProps.description);
                 $('#deleteMissionButton').show(); // Show delete button for existing missions
                 $('#missionModal').modal('show');
-            }
+            },
+            eventColor: '#eb6f92'
         });
 
         calendar.render();

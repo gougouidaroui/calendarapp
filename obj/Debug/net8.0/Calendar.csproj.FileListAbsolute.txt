@@ -171,3 +171,4 @@
 /home/yoon/Documents/work/csharp/Calendar/bin/Debug/net8.0/Microsoft.AspNetCore.Identity.UI.dll
 /home/yoon/Documents/work/csharp/Calendar/bin/Debug/net8.0/Microsoft.Extensions.FileProviders.Embedded.dll
 /home/yoon/Documents/work/csharp/Calendar/obj/Debug/net8.0/Calendar.MvcApplicationPartsAssemblyInfo.cs
+/home/yoon/Documents/work/csharp/Calendar/obj/Debug/net8.0/Calendar.sourcelink.json

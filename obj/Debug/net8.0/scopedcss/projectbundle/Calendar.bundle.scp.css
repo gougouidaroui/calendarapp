@@ -15,6 +15,7 @@
     border: 1px solid #ddd;
     border-radius: 8px 0px 0px 8px;
     border-right: none;
+    color: #000;
 }
 .image-holder[b-n80mowmy6q] {
     width:100%;
@@ -45,6 +46,10 @@
   position: relative;
   z-index: 2;
 }
+.login-ref[b-n80mowmy6q] {
+    color: #f6c177 !important;
+}
+
 /* _content/Calendar/Views/Account/register.cshtml.rz.scp.css */
 .article-box[b-ljp77u28a7] {
     display: flex;
@@ -62,6 +67,7 @@
     border: 1px solid #ddd;
     border-radius: 8px 0px 0px 8px;
     border-right: none;
+    color: #000;
 }
 .image-holder[b-ljp77u28a7] {
     width:100%;
@@ -94,6 +100,9 @@
   position: relative;
   z-index: 2;
 }
+.login-ref[b-ljp77u28a7] {
+    color: #f6c177 !important;
+}
 /* _content/Calendar/Views/Mission/Calendar.cshtml.rz.scp.css */
 .article-box[b-ac8x0wzefo] {
     display: flex;
@@ -106,41 +115,65 @@
     height:100%;
     width:65%;
     padding: 2rem;
-    background-color: #fff;
+    background-color: #393552;
     border: 1px solid #ddd;
     border-radius: 8px;
+}
+
+.modal-header[b-ac8x0wzefo] {
+    background-color: #393552;
+}
+.modal-body[b-ac8x0wzefo] {
+    color: #000;
 }
 /* _content/Calendar/Views/Shared/_Layout.cshtml.rz.scp.css */
 /* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
-
 a.navbar-brand[b-uy2ta6uuxa] {
   white-space: normal;
   text-align: center;
   word-break: break-all;
+  color: #e0def4 !important;
+  text-decoration: none !important;
 }
 
 a[b-uy2ta6uuxa] {
-  color: #0077cc;
+  color: #e0def4 !important;
+  text-decoration: none !important;
+}
+.text-white-custom[b-uy2ta6uuxa] {
+  color: #e0def4 !important;
 }
 
 .btn-primary[b-uy2ta6uuxa] {
-  color: #fff;
+  color: #908caa !important;
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
 
 .nav-pills .nav-link.active[b-uy2ta6uuxa], .nav-pills .show > .nav-link[b-uy2ta6uuxa] {
-  color: #fff;
+  color: #908caa !important;
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
 
+.nav-link-custom[b-uy2ta6uuxa] {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #908caa !important;
+  text-decoration: none;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+.nav-link-custom:hover[b-uy2ta6uuxa],
+.nav-link-custom:focus[b-uy2ta6uuxa] {
+  color: #e0def4;
+}
+
 .border-top[b-uy2ta6uuxa] {
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid #56526e;
 }
 .border-bottom[b-uy2ta6uuxa] {
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #56526e;
 }
 
 .box-shadow[b-uy2ta6uuxa] {

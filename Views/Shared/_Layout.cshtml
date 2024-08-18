@@ -14,7 +14,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><span><svg width="60" height="60" viewBox="0 0 60 82" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M29.8432 80.0007C14.0578 80.0007 1.26184 62.4007 1.26184 40.6887C1.26184 18.9767 14.0578 1.37674 29.8432 1.37674C45.6285 1.37674 58.4245 18.9767 58.4245 40.6887C58.4245 62.4007 45.6285 80.0007 29.8432 80.0007Z" fill="#1D245D"/>
@@ -86,25 +86,25 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1 my-2 my-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link-custom" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Mission" asp-action="Calendar">Calendar</a>
+                            <a class="nav-link-custom" asp-area="" asp-controller="Mission" asp-action="Calendar">Calendar</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav ml-auto">
                            @if (User.Identity.IsAuthenticated)
                 {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                            <a class="nav-link-custom" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                         </li>
                 } else {
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                            <a class="nav-link-custom" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                            <a class="nav-link-custom text-white-custom" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
                         </li>
                         }
                     </ul>
