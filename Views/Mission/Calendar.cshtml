@@ -7,7 +7,7 @@
         start = m.StartDate.ToString("yyyy-MM-dd"),
         end = m.EndDate.ToString("yyyy-MM-dd"),
         site = m.Site.ToString(),
-        employee = m.Employee.ToString(),
+        employees = m.Employees.Select(e => new { id = e.Id, name = e.Name }).ToList(),
         description = m.Description
     }).ToList();
 
@@ -26,11 +26,6 @@
 
     <select id="employeeFilter" class="filter-cell">
         <option value="">Tous les employés</option>
-        <option value="Employe">Employé</option>
-        <option value="Gardien">Gardien</option>
-        <option value="Conseiller">Conseiller</option>
-        <option value="Directeur">Directeur</option>
-        <option value="Agent">Agent</option>
     </select>
 </div>
 <!-- Modal for creating/editing missions -->
@@ -42,7 +37,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal">
                 </button>
             </div>
-            <form id="missionForm" autocomplete="off">
+            <form id="missionForm">
                 <input type="hidden" id="missionId" name="missionId" />
                 <div class="modal-body">
                     <div class="form-group">
@@ -69,13 +64,8 @@
                         </select>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="employee">Employé</label>
-                        <select id="employee" name="Employee" class="form-control" required>
-                            <option value="Employe">Employe</option>
-                            <option value="Gardien">Gardien</option>
-                            <option value="Conseiller">Conseiller</option>
-                            <option value="Directeur">Directeur</option>
-                            <option value="Agent">Agent</option>
+                        <label for="employees">Employés</label>
+                        <select id="employees" name="employees" class="form-control" multiple="multiple" required>
                         </select>
                     </div>
                     <div class="form-group">
@@ -94,7 +84,7 @@
 </div>
 
 <div class="article-box">
-<div class="login-container">
+<div id="container" class="login-container">
 <div id="calendar"></div>
 </div>
 </div>
@@ -103,9 +93,17 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('calendar');
+        var height = document.getElementById('container').offsetHeight - 60;
 
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
+            height: height,
+            windowResize: true,
+            windowResize: function (arg) {
+                var height = document.getElementById('container').offsetHeight - 60;
+                calendar.setOption('height', height);
+            },
+            aspectRatio: 0.5,
             editable: true,
             locale: 'fr',
             events: @Html.Raw(jsonMissions),
@@ -114,7 +112,8 @@
                 $('#startDate').val(info.dateStr);
                 $('#endDate').val(info.dateStr);
                 $('#site').val('SiteA');
-                $('#employee').val('Employe');
+                $('#selectedEmployees').empty();
+                $('#selectedEmployeeIds').val('');
                 $('#deleteMissionButton').hide();
                 $('#missionModal').modal('show');
             },
@@ -125,7 +124,6 @@
                 var startDate = new Date(mission.start);
                 startDate.setDate(startDate.getDate() + 1);
                 $('#startDate').val(startDate.toISOString().slice(0,10));
-                
                 if (!mission.endStr) {
                     var startDate = new Date(mission.start);
                     startDate.setDate(startDate.getDate() + 1);
@@ -134,35 +132,51 @@
                     $('#endDate').val(mission.endStr);
                 }
                 $('#site').val(mission.extendedProps.site);
-                $('#employee').val(mission.extendedProps.employee);
+                $('#employees').val(null).trigger('change');
+                $.ajax({
+                    url: '@Url.Action("GetAllEmployees", "Mission")',
+                    type: 'GET',
+                    success: function(data) {
+                        var selectedEmployeeIds = mission.extendedProps.employees.map(e => e.id);
+                        $('#employees').select2({
+                            data: data.map(employee => ({
+                                id: employee.id,
+                                text: employee.name,
+                                selected: selectedEmployeeIds.includes(employee.name)
+                            })),
+                            placeholder: 'Sélectionnez des employés',
+                            allowClear: true
+                        }).val(selectedEmployeeIds).trigger('change');
+                    },
+                    error: function() {
+                        alert('Failed to load employee data.');
+                    }
+                });
                 $('#description').val(mission.extendedProps.description);
                 $('#deleteMissionButton').show();
                 $('#missionModal').modal('show');
             },
-            eventColor: '#eb6f92'
+            eventColor: '#D6CABC'
         });
 
         calendar.render();
 
-
         $('#missionForm').on('submit', function(event) {
             event.preventDefault();
-
             var missionId = $('#missionId').val();
             var title = $('#title').val();
             var startDate = $('#startDate').val();
             var endDate = $('#endDate').val();
             var site = $('#site').val();
-            var employee = $('#employee').val();
+            var employeeIds = $('#employees').val();
             var description = $('#description').val();
-
 
             var data = {
                 title: title,
                 startDate: startDate,
                 endDate: endDate,
                 site: site,
-                employee: employee,
+                employees: employeeIds,
                 description: description
             };
 
@@ -177,25 +191,25 @@
                 success: function(response) {
                     if(response.success) {
                         if (missionId) {
-                        var event = calendar.getEventById(missionId);
-                        event.setProp('title', title);
-                        event.setDates(startDate, endDate);
-                        event.setExtendedProp('site', site);
-                        event.setExtendedProp('employee', employee);
-                        event.setExtendedProp('description', description);
-                    } else {
-                        calendar.addEvent({
-                            id: response.id,
-                            title: title,
-                            start: startDate,
-                            end: endDate,
-                            extendedProps: {
-                                site: site,
-                                employee: employee,
-                                description: description
-                            }
-                        });
-                    }
+                            var event = calendar.getEventById(missionId);
+                            event.setProp('title', title);
+                            event.setDates(startDate, endDate);
+                            event.setExtendedProp('site', site);
+                            event.setExtendedProp('employees', response.employees);
+                            event.setExtendedProp('description', description);
+                        } else {
+                            calendar.addEvent({
+                                id: response.id,
+                                title: title,
+                                start: startDate,
+                                end: endDate,
+                                extendedProps: {
+                                    site: site,
+                                    employees: response.employees,
+                                    description: description
+                                }
+                            });
+                        }
                         $('#missionModal').modal('hide');
                     } else {
                         alert('An error occurred while saving the mission.');
@@ -206,6 +220,7 @@
                 }
             });
         });
+
         $('#deleteMissionButton').on('click', function() {
             var missionId = $('#missionId').val();
 
@@ -234,21 +249,35 @@
             }
         });
 
+
+        $.ajax({
+            url: '@Url.Action("GetAllEmployees", "Mission")',
+            type: 'GET',
+            success: function(data) {
+                var employeeFilter = $('#employeeFilter');
+                employeeFilter.empty();
+                employeeFilter.append(new Option('Tous les employés', ''));
+
+                data.forEach(function(employee) {
+                    employeeFilter.append(new Option(employee.text));
+                });
+            },
+            error: function() {
+                alert('Failed to load employee data.');
+            }
+        });
         function filterEvents() {
             var selectedSite = $('#siteFilter').val();
             var selectedEmployee = $('#employeeFilter').val();
-
             calendar.removeAllEvents();
             var allEvents = @Html.Raw(jsonMissions);
-
-            // Filter events based on the selected values
             var filteredEvents = allEvents.filter(function(event) {
                 var matchesSite = selectedSite === "" || event.site === selectedSite;
-                var matchesEmployee = selectedEmployee === "" || event.employee === selectedEmployee;
+                var matchesEmployee = selectedEmployee === "" || event.employees.some(e => e.name == selectedEmployee);
+
                 return matchesSite && matchesEmployee;
             });
 
-            // Add the filtered events back to the calendar
             filteredEvents.forEach(function(event) {
                 calendar.addEvent({
                     id: event.id,
@@ -257,18 +286,47 @@
                     end: event.end,
                     extendedProps: {
                         site: event.site,
-                        employee: event.employee,
+                        employees: event.employees,
                         description: event.description
                     }
                 });
             });
-        };
+        }
 
-        // Event listeners for the dropdowns
         $('#siteFilter').on('change', filterEvents);
         $('#employeeFilter').on('change', filterEvents);
+        $('#employees').select2({
+            placeholder: 'Sélectionnez des employés',
+            allowClear: true,
+            ajax: {
+                url: '@Url.Action("GetAllEmployees", "Mission")',
+                dataType: 'json',
+                delay: 250,
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1
+        });
+        $.ajax({
+            url: '@Url.Action("GetAllEmployees", "Mission")',
+            type: 'GET',
+            success: function(data) {
+                $('#employees').select2({
+                    data: data,
+                    placeholder: 'Sélectionnez des employés',
+                    allowClear: true
+                });
+            }
+        });
     });
     </script>
     <script src="~/lib/fullcalendar/dist/index.global.min.js"></script>
-    <script src="~/lib/fullcalendar/packages/daygrid/index.global.min.js"></script>
+    <link rel="stylesheet" href="~/lib/jquery-ui/jquery-ui.css">
+    <script type="text/javascript" src="~/lib/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/select2/select2.min.js"></script>
+    <link href="~/lib/select2/select2.min.css" rel="stylesheet" />
 }

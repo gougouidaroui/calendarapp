@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Calendar.Models;
 
 namespace Calendar.Models
 {
@@ -21,7 +22,7 @@ namespace Calendar.Models
         public SiteChoice Site { get; set; }
 
         [Required]
-        public EmployeeChoice Employee { get; set; }
+        public List<Employee> Employees { get; set; } = new List<Employee>();
     }
     public enum SiteChoice
     {
@@ -29,13 +30,5 @@ namespace Calendar.Models
         SiteB,
         SiteC,
         SiteD
-    }
-    public enum EmployeeChoice
-    {
-        Employe,
-        Gardien,
-        Conseiller,
-        Directeur,
-        Agent
     }
 }

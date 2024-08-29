@@ -17,6 +17,43 @@ namespace Calendar.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
+            modelBuilder.Entity("Calendar.Models.Employee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Employees");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Employee"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Guardian"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Directeur"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Conseiller"
+                        });
+                });
+
             modelBuilder.Entity("Calendar.Models.Mission", b =>
                 {
                     b.Property<int>("Id")
@@ -26,9 +63,6 @@ namespace Calendar.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Employee")
-                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
@@ -110,6 +144,21 @@ namespace Calendar.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("EmployeeMission", b =>
+                {
+                    b.Property<int>("EmployeesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MissionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("EmployeesId", "MissionId");
+
+                    b.HasIndex("MissionId");
+
+                    b.ToTable("EmployeeMission");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -238,6 +287,21 @@ namespace Calendar.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("EmployeeMission", b =>
+                {
+                    b.HasOne("Calendar.Models.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Calendar.Models.Mission", null)
+                        .WithMany()
+                        .HasForeignKey("MissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

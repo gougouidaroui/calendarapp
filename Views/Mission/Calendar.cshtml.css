@@ -6,16 +6,16 @@
 }
 
 .login-container {
-    height:100%;
-    width:65%;
+    height: 100%;
+    width: 90%;
     padding: 2rem;
-    background-color: #393552;
+    background-color: #BDA18B;
     border: 1px solid #ddd;
     border-radius: 8px;
 }
 
 .modal-header {
-    background-color: #393552;
+    background-color: #C59D83;
 }
 .modal-body {
     color: #000;
@@ -26,3 +26,20 @@
     display: flex;
     right: 0;
 }
+.badge {
+    display: inline-block;
+    padding: 0.5em;
+    margin: 0.2em;
+    background-color: #007bff;
+    color: white;
+    border-radius: 0.25em;
+}
+#employee-list {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+#employee-list .list-group-item {
+    cursor: pointer;
+}
+

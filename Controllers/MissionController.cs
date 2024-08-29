@@ -14,62 +14,92 @@ public class MissionController : Controller
 
     public async Task<IActionResult> Calendar()
     {
-        if (User.Identity.IsAuthenticated){
-        var missions = await _context.Missions.ToListAsync();
-        return View(missions);
-        } else {
-                return RedirectToAction("Login", "Account");
+        if (User.Identity.IsAuthenticated)
+        {
+            var missions = await _context.Missions
+                .Include(m => m.Employees) // Ensure Employees are included
+                .ToListAsync();
+            return View(missions);
+        }
+        else
+        {
+            return RedirectToAction("Login", "Account");
         }
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm] Mission mission)
+    public async Task<IActionResult> Create([FromForm] Mission mission, [FromForm] List<int> employees)
     {
-        if (User.Identity.IsAuthenticated){
-        if (ModelState.IsValid)
+        if (User.Identity.IsAuthenticated)
         {
-            if (mission.Id > 0)
+            if (ModelState.IsValid)
             {
-                var existingMission = await _context.Missions.FindAsync(mission.Id);
-                if (existingMission != null)
+                var selectedEmployees = await _context.Employees
+                    .Where(e => employees.Contains(e.Id))
+                    .ToListAsync();
+
+                if (mission.Id > 0)
                 {
-                    existingMission.Title = mission.Title;
-                    existingMission.StartDate = mission.StartDate;
-                    existingMission.Site = mission.Site;
-                    existingMission.Employee = mission.Employee;
-                    existingMission.EndDate = mission.EndDate;
-                    existingMission.Description = mission.Description;
+                    var existingMission = await _context.Missions.Include(m => m.Employees)
+                        .FirstOrDefaultAsync(m => m.Id == mission.Id);
+
+                    if (existingMission != null)
+                    {
+                        existingMission.Title = mission.Title;
+                        existingMission.StartDate = mission.StartDate;
+                        existingMission.Site = mission.Site;
+                        existingMission.EndDate = mission.EndDate;
+                        existingMission.Description = mission.Description;
+
+                        existingMission.Employees.Clear();
+                        existingMission.Employees.AddRange(selectedEmployees);
+
+                        await _context.SaveChangesAsync();
+                        return Json(new { success = true, employees = selectedEmployees });
+                    }
+                }
+                else
+                {
+                    // Assign selected employees to the new mission
+                    mission.Employees = selectedEmployees;
+                    _context.Add(mission);
                     await _context.SaveChangesAsync();
-                    return Json(new { success = true });
+                    return Json(new { success = true, id = mission.Id, employees = selectedEmployees });
                 }
             }
-            else
-            {
-                _context.Add(mission);
-                await _context.SaveChangesAsync();
-                return Json(new { success = true, id = mission.Id });
-            }
+            return Json(new { success = false });
         }
-        return Json(new { success = false });
-        } else {
-                return RedirectToAction("Index", "Home");
+        else
+        {
+            return RedirectToAction("Index", "Home");
         }
     }
 
     [HttpPost]
     public async Task<IActionResult> DeleteMission(int id)
     {
-        if (User.Identity.IsAuthenticated){
-        var mission = await _context.Missions.FindAsync(id);
-        if (mission != null)
+        if (User.Identity.IsAuthenticated)
         {
-            _context.Missions.Remove(mission);
-            await _context.SaveChangesAsync();
-            return Json(new { success = true });
+            var mission = await _context.Missions.FindAsync(id);
+            if (mission != null)
+            {
+                _context.Missions.Remove(mission);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Mission not found." });
         }
-        return Json(new { success = false, message = "Mission not found." });
-        } else {
-                return RedirectToAction("Index", "Home");
+        else
+        {
+            return RedirectToAction("Index", "Home");
         }
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetAllEmployees()
+    {
+        var employees = await _context.Employees
+            .Select(e => new { id = e.Id, text = e.Name })
+            .ToListAsync();
+        return Json(employees);
     }
 }
